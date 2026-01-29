@@ -36,10 +36,7 @@ export const http = ky.create({
         // Nếu chưa có request refresh nào đang chạy, thực hiện refresh và lưu lại promise
         if (!isRefreshing) {
           isRefreshing = true;
-          refreshPromise = ky.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-            { credentials: "include" },
-          );
+          refreshPromise = http.post("auth/refresh");
         }
 
         try {
@@ -49,8 +46,7 @@ export const http = ky.create({
             throw new Error("Failed to refresh token");
           }
 
-          // Nếu refresh thành công, gửi lại request ban đầu
-          return ky(request, options);
+          return http(request, options); // retry
         } catch {
           // Nếu refresh thất bại, trả về response lỗi để tầng trên xử lý (ví dụ: logout)
           return response;
