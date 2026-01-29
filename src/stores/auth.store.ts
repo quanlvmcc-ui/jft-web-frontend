@@ -5,6 +5,7 @@ type AuthState = {
   user: User | null;
   isAuthenticated: boolean;
   setUser: (user: User | null) => void;
+  logout: () => void;
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -15,5 +16,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     set(() => ({
       user,
       isAuthenticated: Boolean(user),
+    })),
+
+  logout: () =>
+    set(() => ({
+      user: null,
+      isAuthenticated: false,
     })),
 }));

@@ -7,5 +7,6 @@ export type User = {
 };
 
 export const authApi = {
-  me: () => http.get("me").json<User>(),
+  me: () => http.get("users/me").json<User>(),
+  logout: () => http.post("auth/logout"),
 };
