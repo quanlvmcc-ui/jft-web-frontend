@@ -1,14 +1,22 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { usePublishedExamQuery } from "@/queries/exam";
+import { useParams, useRouter } from "next/navigation";
+import { usePublishedExamQuery, useStartSessionMutation } from "@/queries/exam";
+import { Button } from "@/components/ui/button";
 
 export default function ExamDetailPage() {
   const params = useParams<{ id: string }>();
   const examId = params?.id ?? "";
+  const router = useRouter();
   const { data, isLoading, isError, error } = usePublishedExamQuery({
     examId,
   });
+  const startSessionMutation = useStartSessionMutation();
+
+  const handleStart = async () => {
+    const session = await startSessionMutation.mutateAsync(examId);
+    router.push(`/exam/${examId}/session/${session.id}`);
+  };
 
   if (isLoading) {
     return <div className="p-6">Đang tải đề thi...</div>;
@@ -37,6 +45,15 @@ export default function ExamDetailPage() {
         )}
         <div className="text-sm">Thời gian: {data.timeLimit} phút</div>
         <div className="text-sm">Trạng thái: {data.status}</div>
+        <Button
+          onClick={handleStart}
+          className="mt-4"
+          disabled={startSessionMutation.isPending}
+        >
+          {startSessionMutation.isPending
+            ? "Đang tạo phiên làm bài..."
+            : "Bắt đầu làm bài"}
+        </Button>
       </div>
     </div>
   );
