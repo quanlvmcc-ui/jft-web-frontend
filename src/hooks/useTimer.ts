@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 interface UseTimerProps {
   startTime: string;
-  timeLimit: number;
+  timeLimit: number; // GIÂY (seconds) - ví dụ: 1800 = 30 phút
   onExpired?: () => void; // callback khi het gio --> auto submit
 }
 

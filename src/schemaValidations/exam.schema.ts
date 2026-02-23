@@ -6,7 +6,7 @@ export const ExamSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().nullable(),
-  timeLimit: z.number(),
+  timeLimit: z.number(), // GIÂY (seconds) - ví dụ: 1800 = 30 phút
   status: ExamStatusSchema,
 });
 
@@ -20,7 +20,7 @@ export const ExamSessionSchema = z.object({
   userId: z.string(),
   status: ExamSessionStatus,
   startTime: z.string().datetime(),
-  timeLimit: z.number(),
+  timeLimit: z.number(), // GIÂY (seconds)
   totalCorrect: z.number().nullable(),
   totalWrong: z.number().nullable(),
   totalUnanswered: z.number().nullable(),
@@ -53,7 +53,7 @@ export const SessionDetailSchema = z.object({
   examId: z.string(),
   status: z.string(),
   startTime: z.string().datetime(),
-  timeLimit: z.number(),
+  timeLimit: z.number(), // GIÂY (seconds)
   createdAt: z.string().datetime(),
   submittedAt: z.string().datetime().nullable(),
   questions: z.array(QuestionWithAnswerSchema),
@@ -81,7 +81,7 @@ export const SubmitExamResponseSchema = z.object({
   examId: z.string(),
   status: ExamSessionStatus,
   startTime: z.string().datetime(),
-  timeLimit: z.number(),
+  timeLimit: z.number(), // GIÂY (seconds)
   totalCorrect: z.number().nullable(),
   totalWrong: z.number().nullable(),
   totalUnanswered: z.number().nullable(),
@@ -117,7 +117,7 @@ export const ExamResultSchema = z.object({
   status: z.literal("SUBMITTED"),
   submittedAt: z.string().datetime(),
   startTime: z.string().datetime(),
-  timeLimit: z.number(),
+  timeLimit: z.number(), // GIÂY (seconds)
   totalCorrect: z.number(),
   totalWrong: z.number(),
   totalUnanswered: z.number(),

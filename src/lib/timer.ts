@@ -19,11 +19,11 @@ interface TimerInfo {
  * 【MAIN FUNCTION】
  * Tính tất cả thông tin timer
  * @param startTime - ISO string từ backend (ví dụ: "2026-02-21T10:00:00")
- * @param timeLimitMinutes - Số phút từ backend (ví dụ: 30)
+ * @param timeLimitSeconds - Số GIÂY từ backend (ví dụ: 1800 = 30 phút)
  */
 export function calculateTimerInfo(
   startTime: string,
-  timeLimitMinutes: number,
+  timeLimitSeconds: number,
 ): TimerInfo {
   // 【Bước 1】Chuyển đổi startTime (string) → Date object
   const startDate = new Date(startTime);
@@ -33,8 +33,8 @@ export function calculateTimerInfo(
   const elapsedMs = now.getTime() - startDate.getTime();
   const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
-  // 【Bước 3】Tính tổng thời gian (đổi phút → giây)
-  const totalSeconds = timeLimitMinutes * 60;
+  // 【Bước 3】Tổng thời gian (đã là giây rồi, không cần nhân 60)
+  const totalSeconds = timeLimitSeconds;
 
   // 【Bước 4】Tính thời gian còn lại
   // ⚠️ Quan trọng: không được âm!
