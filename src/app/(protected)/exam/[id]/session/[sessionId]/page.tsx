@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState, useMemo } from "react"; // ✅ Thêm useState, useMemo
 import {
   useSaveAnswerMutation,
   useSessionDetailQuery,
@@ -8,6 +8,7 @@ import {
 } from "@/queries/exam";
 import { useParams, useRouter } from "next/navigation";
 import { useTimer } from "@/hooks/useTimer";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"; // ✅ Import dialog mới tạo
 
 export default function ExamSessionPage() {
   const params = useParams<{ id: string; sessionId: string }>();
@@ -19,12 +20,62 @@ export default function ExamSessionPage() {
     sessionId,
   });
 
+  /**
+   * 🎓 STATE QUẢN LÝ DIALOG
+   * Kiến thức: React useState hook
+   * - showConfirmDialog: boolean state
+   * - setShowConfirmDialog: function để update state
+   */
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
   const submitMutation = useSubmitExamMutation({
     onSuccess: () => {
       // Redirect to result page after submit
       router.push(`/exam/${examId}/session/${sessionId}/result`);
     },
   });
+
+  /**
+   * 🎓 TÍNH TOÁN THỐNG KÊ CÂU HỎI
+   * Kiến thức: useMemo - chỉ tính lại khi data thay đổi
+   * Tránh tính lại mỗi lần component re-render
+   */
+  const questionStats = useMemo(() => {
+    if (!data) return { answered: 0, unanswered: 0, total: 0 };
+
+    const answered = data.questions.filter(
+      (q) => q.selectedOptionId !== null,
+    ).length;
+    const total = data.questions.length;
+    const unanswered = total - answered;
+
+    return { answered, unanswered, total };
+  }, [data]); // ← dependency: chỉ chạy lại khi data thay đổi
+
+  /**
+   * 🎓 HANDLER KHI CLICK NÚT "NỘP BÀI"
+   * Flow: Click button → Mở dialog thay vì submit ngay
+   */
+  const handleSubmitClick = () => {
+    setShowConfirmDialog(true); // Mở dialog
+  };
+
+  /**
+   * 🎓 HANDLER KHI XÁC NHẬN TRONG DIALOG
+   * Flow: User click "Xác nhận" trong dialog → Thực sự submit
+   */
+  const handleConfirmSubmit = () => {
+    submitMutation.mutate(examId); // Submit API
+    // Không cần setShowConfirmDialog(false) vì sẽ redirect
+  };
+
+  /**
+   * 🎓 HANDLER KHI HỦY TRONG DIALOG
+   * Flow: User click "Hủy" hoặc click backdrop → Đóng dialog
+   */
+  const handleCancelSubmit = () => {
+    setShowConfirmDialog(false); // Đóng dialog
+  };
 
   const handleTimeExpired = useCallback(() => {
     submitMutation.mutate(examId);
@@ -132,8 +183,13 @@ export default function ExamSessionPage() {
 
       {/* ═══ SUBMIT BUTTON (Fixed Bottom) ═══ */}
       <div className="bg-white border-t p-6 flex justify-center gap-4 sticky bottom-0">
+        {/**
+         * 🎓 THAY ĐỔI QUAN TRỌNG:
+         * - onClick: submitMutation.mutate() → handleSubmitClick()
+         * - Không submit ngay, mà mở dialog trước
+         */}
         <button
-          onClick={() => submitMutation.mutate(examId)}
+          onClick={handleSubmitClick}
           disabled={submitMutation.isPending || isLoading}
           className={`px-12 py-3 rounded-lg font-semibold text-white text-lg transition-all shadow-md hover:shadow-lg ${
             submitMutation.isPending || isLoading
@@ -144,6 +200,24 @@ export default function ExamSessionPage() {
           {submitMutation.isPending ? "⏳ Đang nộp..." : "✓ Nộp bài"}
         </button>
       </div>
+
+      {/**
+       * 🎓 THÊM CONFIRM DIALOG
+       * - Render ở cuối component (outside main layout)
+       * - Dialog sẽ overlay lên toàn bộ màn hình
+       * - Position: fixed trong component
+       */}
+      <ConfirmDialog
+        open={showConfirmDialog}
+        title="Xác nhận nộp bài"
+        message="Bạn có chắc chắn muốn nộp bài? Bạn sẽ không thể thay đổi câu trả lời sau khi nộp."
+        confirmText="Nộp bài"
+        cancelText="Kiểm tra lại"
+        onConfirm={handleConfirmSubmit}
+        onCancel={handleCancelSubmit}
+        loading={submitMutation.isPending}
+        stats={questionStats}
+      />
     </div>
   );
 }
