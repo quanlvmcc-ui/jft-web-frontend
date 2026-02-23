@@ -43,7 +43,9 @@ export default function ExamDetailPage() {
             {data.description}
           </div>
         )}
-        <div className="text-sm">Thời gian: {data.timeLimit} phút</div>
+        <div className="text-sm">
+          Thời gian: {Math.floor(data.timeLimit / 60)} phút
+        </div>
         <div className="text-sm">Trạng thái: {data.status}</div>
         <Button
           onClick={handleStart}

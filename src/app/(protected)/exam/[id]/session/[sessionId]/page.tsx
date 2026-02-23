@@ -140,6 +140,54 @@ export default function ExamSessionPage() {
   }, []);
 
   /**
+   * 🎓 KEYBOARD NAVIGATION EFFECT (STEP 6)
+   * Kiến thức: Event listener trong React
+   *
+   * Pattern:
+   * 1. Add event listener trong useEffect
+   * 2. Handler function check key và boundaries
+   * 3. Call handleSelectQuestion để chuyển câu
+   * 4. Cleanup: Remove listener khi unmount
+   *
+   * Keys:
+   * - ArrowLeft (←) → Câu trước (nếu không phải câu đầu)
+   * - ArrowRight (→) → Câu sau (nếu không phải câu cuối)
+   *
+   * Use case: User có thể dùng keyboard để navigate nhanh hơn
+   * Accessibility: Keyboard-only users có thể dùng được
+   */
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Chỉ xử lý khi không có dialog đang mở
+      if (showConfirmDialog) return;
+
+      // Arrow Left: Câu trước
+      if (e.key === "ArrowLeft" && currentQuestionIndex > 0) {
+        e.preventDefault(); // Prevent page scroll
+        handleSelectQuestion(currentQuestionIndex - 1);
+      }
+
+      // Arrow Right: Câu sau
+      if (
+        e.key === "ArrowRight" &&
+        data &&
+        currentQuestionIndex < data.questions.length - 1
+      ) {
+        e.preventDefault(); // Prevent page scroll
+        handleSelectQuestion(currentQuestionIndex + 1);
+      }
+    };
+
+    // Add listener to window
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup: Remove listener when component unmounts
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentQuestionIndex, data, showConfirmDialog]); // Dependencies
+
+  /**
    * 🎓 HANDLER KHI XÁC NHẬN TRONG DIALOG
    * Flow: User click "Xác nhận" trong dialog → Thực sự submit
    */
