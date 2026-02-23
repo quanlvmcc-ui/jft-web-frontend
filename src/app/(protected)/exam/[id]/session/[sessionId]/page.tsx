@@ -273,9 +273,9 @@ export default function ExamSessionPage() {
               </div>
             </div>
 
-            {/* Question Count */}
+            {/* Question Count + Current Progress */}
             <div className="text-sm text-gray-600">
-              {data.questions.length} câu hỏi
+              Câu {currentQuestionIndex + 1} / {data.questions.length}
             </div>
           </div>
 
@@ -294,66 +294,92 @@ export default function ExamSessionPage() {
           </div>
         </div>
 
-        {/* ═══ QUESTIONS (Scrollable Content) ═══ */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">
-            {data.questions.length} câu hỏi
-          </h2>
-          {data.questions.map((q, index) => (
-            <div
-              key={q.questionId}
-              id={`question-${index}`}
-              ref={(el) => {
-                if (el) questionRefs.current[index] = el;
-              }}
-              className="bg-white border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow scroll-mt-20"
-            >
-              <h3 className="font-semibold text-gray-800 mb-4">
-                Câu {q.order}:{" "}
-                <span dangerouslySetInnerHTML={{ __html: q.contentHtml }} />
-              </h3>
-              <div className="space-y-3 pl-2">
-                {q.options.map((opt) => (
-                  <label
-                    key={opt.id}
-                    className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
-                  >
-                    <input
-                      type="radio"
-                      name={`q-${q.questionId}`}
-                      value={opt.id}
-                      checked={q.selectedOptionId === opt.id}
-                      onChange={() => handeSelectOption(q.questionId, opt.id)}
-                      className="flex-shrink-0 cursor-pointer"
-                    />
-                    <span
-                      className="text-gray-700"
-                      dangerouslySetInnerHTML={{ __html: opt.contentHtml }}
-                    />
-                  </label>
-                ))}
+        {/* ═══ SINGLE QUESTION DISPLAY ═══ */}
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col justify-center">
+          {(() => {
+            const q = data.questions[currentQuestionIndex];
+            return (
+              <div className="bg-white border rounded-lg p-8 shadow-md max-w-2xl mx-auto w-full">
+                {/* 🎓 QUESTION HEADER */}
+                <div className="mb-6 pb-4 border-b">
+                  <h2 className="text-xl text-gray-500 font-medium mb-3">
+                    Câu {q.order}
+                  </h2>
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    <span dangerouslySetInnerHTML={{ __html: q.contentHtml }} />
+                  </h3>
+                </div>
+
+                {/* 🎓 QUESTION OPTIONS */}
+                <div className="space-y-4">
+                  {q.options.map((opt) => (
+                    <label
+                      key={opt.id}
+                      className={`flex items-center space-x-4 cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                        q.selectedOptionId === opt.id
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`q-${q.questionId}`}
+                        value={opt.id}
+                        checked={q.selectedOptionId === opt.id}
+                        onChange={() => handeSelectOption(q.questionId, opt.id)}
+                        className="flex-shrink-0 w-5 h-5 cursor-pointer"
+                      />
+                      <span
+                        className="text-lg text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: opt.contentHtml }}
+                      />
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })()}
         </div>
 
-        {/* ═══ SUBMIT BUTTON (Fixed Bottom) ═══ */}
-        <div className="bg-white border-t p-6 flex justify-center gap-4 sticky bottom-0">
-          {/**
-           * 🎓 THAY ĐỔI QUAN TRỌNG:
-           * - onClick: submitMutation.mutate() → handleSubmitClick()
-           * - Không submit ngay, mà mở dialog trước
-           */}
+        {/* ═══ NAVIGATION & SUBMIT (Fixed Bottom) ═══ */}
+        <div className="bg-white border-t p-4 flex justify-center items-center gap-3 sticky bottom-0">
+          {/* 🎓 PREVIOUS BUTTON */}
+          <button
+            onClick={() => handleSelectQuestion(currentQuestionIndex - 1)}
+            disabled={currentQuestionIndex === 0}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
+              currentQuestionIndex === 0
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-600 text-white hover:bg-gray-700 active:scale-95"
+            }`}
+          >
+            ← Câu trước
+          </button>
+
+          {/* 🎓 SUBMIT BUTTON */}
           <button
             onClick={handleSubmitClick}
             disabled={submitMutation.isPending || isLoading}
-            className={`px-12 py-3 rounded-lg font-semibold text-white text-lg transition-all shadow-md hover:shadow-lg ${
+            className={`px-8 py-2 rounded-lg font-semibold text-white transition-all shadow-md hover:shadow-lg text-sm ${
               submitMutation.isPending || isLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700 active:scale-95"
             }`}
           >
             {submitMutation.isPending ? "⏳ Đang nộp..." : "✓ Nộp bài"}
+          </button>
+
+          {/* 🎓 NEXT BUTTON */}
+          <button
+            onClick={() => handleSelectQuestion(currentQuestionIndex + 1)}
+            disabled={currentQuestionIndex === data.questions.length - 1}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
+              currentQuestionIndex === data.questions.length - 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-green-600 text-white hover:bg-green-700 active:scale-95"
+            }`}
+          >
+            Câu sau →
           </button>
         </div>
 

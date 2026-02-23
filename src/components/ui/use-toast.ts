@@ -13,6 +13,7 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  duration?: number; // Duration in ms before auto-dismiss (default: 3000)
 };
 
 const actionTypes = {
