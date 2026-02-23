@@ -42,6 +42,19 @@ export default function ExamSessionPage() {
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   /**
+   * 🎓 DEBOUNCE TIMER REF
+   * Kiến thức: useRef cho setTimeout ID
+   * - debounceTimerRef: store setTimeout ID
+   * - Dùng để clearTimeout khi user click lại trước khi delay expire
+   * - Pattern: Delay API call 500ms, reset khi user click lại
+   */
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingAnswerRef = useRef<{
+    questionId: string;
+    selectedOptionId: string;
+  } | null>(null);
+
+  /**
    * 🎓 STATE QUẢN LÝ CÂU HỎI HIỆN TẠI
    * Kiến thức: useState
    * - currentQuestionIndex: index của câu hiện tại (0-based)
@@ -112,6 +125,21 @@ export default function ExamSessionPage() {
   }, [currentQuestionIndex, data]);
 
   /**
+   * 🎓 CLEANUP EFFECT: CLEAR DEBOUNCE TIMER KHI UNMOUNT
+   * Kiến thức: Cleanup function prevent memory leak
+   * - Return function chạy trước khi component unmount hoặc dependency change
+   * - Gọi clearTimeout để hủy pending API call
+   * - Prevent stale closure: Luôn clean up timers/listeners
+   */
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  /**
    * 🎓 HANDLER KHI XÁC NHẬN TRONG DIALOG
    * Flow: User click "Xác nhận" trong dialog → Thực sự submit
    */
@@ -153,11 +181,41 @@ export default function ExamSessionPage() {
     },
   });
 
+  /**
+   * 🎓 HANDLER OPTION CHANGE VỚI DEBOUNCE
+   * Kiến thức: Debounce pattern để giảm API calls
+   *
+   * Vấn đề: User click 3 option liên tiếp = 3 API calls
+   * Giải pháp: Delay 500ms, nếu user click lại thì reset timer
+   *
+   * Timeline:
+   * - Click Q1 option A → Timer start 500ms
+   * - Click Q1 option B (300ms) → Clear timer, reset 500ms
+   * - Click Q1 option C (400ms) → Clear timer, reset 500ms
+   * - (wait 500ms) → API call chỉ 1 lần với option C
+   *
+   * Result: 3 clicks → 1 API call (75% reduction)
+   */
   const handeSelectOption = (questionId: string, selectedOptionId: string) => {
-    saveAnswerMutation.mutate({
-      sessionId,
-      data: { questionId, selectedOptionId },
-    });
+    // Lưu answer tạm thời vào ref
+    pendingAnswerRef.current = { questionId, selectedOptionId };
+
+    // Nếu đã có timer, hủy nó (reset)
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set timer mới: Delay 500ms before call API
+    debounceTimerRef.current = setTimeout(() => {
+      // Kiểm tra pending answer vẫn tồn tại
+      if (pendingAnswerRef.current) {
+        const { questionId, selectedOptionId } = pendingAnswerRef.current;
+        saveAnswerMutation.mutate({
+          sessionId,
+          data: { questionId, selectedOptionId },
+        });
+      }
+    }, 500);
   };
 
   /**
