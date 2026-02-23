@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react"; // ✅ Thêm useState, useMemo
+import { useCallback, useState, useMemo } from "react";
 import {
   useSaveAnswerMutation,
   useSessionDetailQuery,
@@ -8,13 +8,16 @@ import {
 } from "@/queries/exam";
 import { useParams, useRouter } from "next/navigation";
 import { useTimer } from "@/hooks/useTimer";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog"; // ✅ Import dialog mới tạo
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ExamSessionPage() {
   const params = useParams<{ id: string; sessionId: string }>();
   const router = useRouter();
   const examId = params?.id ?? "";
   const sessionId = params?.sessionId ?? "";
+  const { toast } = useToast();
+
   const { data, isLoading, isError, error } = useSessionDetailQuery({
     examId,
     sessionId,
@@ -87,7 +90,21 @@ export default function ExamSessionPage() {
     onExpired: handleTimeExpired,
   });
 
-  const saveAnswerMutation = useSaveAnswerMutation();
+  const saveAnswerMutation = useSaveAnswerMutation({
+    onSuccess: () => {
+      toast({
+        description: "Đã lưu đáp án",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Không thể lưu đáp án",
+      });
+    },
+  });
+
   const handeSelectOption = (questionId: string, selectedOptionId: string) => {
     saveAnswerMutation.mutate({
       sessionId,

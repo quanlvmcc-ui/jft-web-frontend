@@ -33,7 +33,10 @@ export const useSessionDetailQuery = ({
   });
 };
 
-export const useSaveAnswerMutation = () => {
+export const useSaveAnswerMutation = (options?: {
+  onSuccess?: () => void;
+  onError?: () => void;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -47,6 +50,12 @@ export const useSaveAnswerMutation = () => {
     onSuccess: () => {
       // Refetch session detail để update UI với answer mới
       queryClient.invalidateQueries({ queryKey: ["sessionDetail"] });
+      // ✅ Gọi callback từ component nếu có
+      options?.onSuccess?.();
+    },
+    onError: () => {
+      // ✅ Gọi error callback nếu có
+      options?.onError?.();
     },
   });
 };
