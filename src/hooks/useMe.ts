@@ -12,7 +12,7 @@ export function useMe() {
     queryFn: async () => {
       console.log(
         "🔄 Fetching /users/me. Cookies:",
-        document.cookie || "(empty)"
+        document.cookie || "(empty)",
       );
       // Set a 10-second timeout for auth check
       const controller = new AbortController();

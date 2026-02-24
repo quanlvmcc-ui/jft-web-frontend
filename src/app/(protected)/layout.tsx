@@ -19,15 +19,19 @@ export default function ProtectedLayout({
   useEffect(() => {
     console.log(
       "🔍 ProtectedLayout mounted. Cookies:",
-      document.cookie || "(empty)"
+      document.cookie || "(empty)",
     );
     console.log("🔍 Auth state:", { initialized, isAuthenticated, user });
   }, []);
 
   // 🔐 Guard: chỉ chạy SAU khi auth bootstrap xong
   useEffect(() => {
-    console.log("🔍 Auth status changed:", { initialized, isAuthenticated, user });
-    
+    console.log("🔍 Auth status changed:", {
+      initialized,
+      isAuthenticated,
+      user,
+    });
+
     if (!initialized) {
       console.log("⏳ Auth not initialized yet, waiting...");
       return;
