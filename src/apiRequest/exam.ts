@@ -11,8 +11,7 @@ import type {
 const prefix = "exams/";
 
 const examApiRequest = {
-  getExams: () =>
-    http.get(prefix).json<ExamType[]>(),
+  getExams: () => http.get(prefix).json<ExamType[]>(),
 
   getPublishedExam: (examId: string) =>
     http.get(`${prefix}${examId}`).json<ExamType>(),
