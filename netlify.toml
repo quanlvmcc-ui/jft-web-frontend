@@ -1,14 +1,15 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  functions = "functions"
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/next"
   status = 200
 
 [functions]
   node_bundler = "esbuild"
 
 [context.production.environment]
+  NODE_VERSION = "22"
   NEXT_PUBLIC_API_URL = "https://jft-web-backend-vjlink.onrender.com/"
