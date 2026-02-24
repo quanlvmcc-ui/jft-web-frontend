@@ -10,12 +10,21 @@ export function useMe() {
   const query = useQuery<User>({
     queryKey: ["me"],
     queryFn: async () => {
+      console.log(
+        "🔄 Fetching /users/me. Cookies:",
+        document.cookie || "(empty)"
+      );
       // Set a 10-second timeout for auth check
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
+
       try {
-        return await authApi.me();
+        const result = await authApi.me();
+        console.log("✅ /users/me success:", result);
+        return result;
+      } catch (err) {
+        console.error("❌ /users/me error:", err);
+        throw err;
       } finally {
         clearTimeout(timeoutId);
       }
@@ -29,16 +38,19 @@ export function useMe() {
 
   useEffect(() => {
     // ⛔ chưa có kết quả auth
-    if (status === "pending") return;
+    if (status === "pending") {
+      console.log("⏳ useMe: pending");
+      return;
+    }
 
     if (status === "success") {
-      console.log("✅ Auth success:", data);
+      console.log("✅ useMe: success with data:", data);
       setUser(data); // initialized = true
       return;
     }
 
     if (status === "error") {
-      console.log("❌ Auth error:", error);
+      console.log("❌ useMe: error:", error);
       setUser(null); // initialized = true
     }
   }, [status, data, error, setUser]);

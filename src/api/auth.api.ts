@@ -10,8 +10,11 @@ export type User = {
 
 export const authApi = {
   me: () => {
-    console.log("authApi.me called");
+    console.log("📡 Calling authApi.me()");
     return http.get("users/me").json<User>();
   },
-  logout: () => http.post("auth/logout"),
+  logout: () => {
+    console.log("📡 Calling authApi.logout()");
+    return http.post("auth/logout");
+  },
 };

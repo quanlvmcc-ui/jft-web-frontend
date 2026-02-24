@@ -15,12 +15,29 @@ export default function ProtectedLayout({
   const { initialized, isAuthenticated, user } = useAuthStore();
   const router = useRouter();
 
+  // Debug: log cookies on mount
+  useEffect(() => {
+    console.log(
+      "🔍 ProtectedLayout mounted. Cookies:",
+      document.cookie || "(empty)"
+    );
+    console.log("🔍 Auth state:", { initialized, isAuthenticated, user });
+  }, []);
+
   // 🔐 Guard: chỉ chạy SAU khi auth bootstrap xong
   useEffect(() => {
-    if (!initialized) return;
+    console.log("🔍 Auth status changed:", { initialized, isAuthenticated, user });
+    
+    if (!initialized) {
+      console.log("⏳ Auth not initialized yet, waiting...");
+      return;
+    }
 
     if (!isAuthenticated && user === null) {
+      console.log("❌ Not authenticated, redirecting to login");
       router.replace("/login");
+    } else {
+      console.log("✅ Authenticated, allowing access");
     }
   }, [initialized, isAuthenticated, user, router]);
 

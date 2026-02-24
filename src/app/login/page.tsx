@@ -25,7 +25,7 @@ export default function LoginPage() {
 
       // Invalidate the "me" query to refetch user data
       await queryClient.invalidateQueries({ queryKey: ["me"] });
-      
+
       console.log("✅ Login successful, redirecting...");
       // Redirect to home after successful login
       router.push("/");
