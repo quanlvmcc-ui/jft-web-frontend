@@ -9,7 +9,17 @@ export function useMe() {
 
   const query = useQuery<User>({
     queryKey: ["me"],
-    queryFn: authApi.me,
+    queryFn: async () => {
+      // Set a 10-second timeout for auth check
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      try {
+        return await authApi.me();
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    },
     retry: false,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -22,11 +32,13 @@ export function useMe() {
     if (status === "pending") return;
 
     if (status === "success") {
+      console.log("✅ Auth success:", data);
       setUser(data); // initialized = true
       return;
     }
 
     if (status === "error") {
+      console.log("❌ Auth error:", error);
       setUser(null); // initialized = true
     }
   }, [status, data, error, setUser]);
