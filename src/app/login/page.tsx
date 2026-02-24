@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { http } from "@/lib/http";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,9 +23,14 @@ export default function LoginPage() {
         json: { email, password },
       });
 
+      // Invalidate the "me" query to refetch user data
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      
+      console.log("✅ Login successful, redirecting...");
       // Redirect to home after successful login
       router.push("/");
     } catch (err) {
+      console.error("❌ Login error:", err);
       setError("Email hoặc mật khẩu không đúng");
     } finally {
       setLoading(false);
