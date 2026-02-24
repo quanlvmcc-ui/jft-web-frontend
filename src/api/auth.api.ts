@@ -11,6 +11,7 @@ export type User = {
 export const authApi = {
   me: () => {
     console.log("📡 Calling authApi.me()");
+    console.log("🔐 Current cookies:", document.cookie);
     return http.get("users/me").json<User>();
   },
   logout: () => {

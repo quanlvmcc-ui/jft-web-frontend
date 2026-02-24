@@ -19,9 +19,13 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await http.post("auth/login", {
+      console.log("🔐 Before login - cookies:", document.cookie);
+      const response = await http.post("auth/login", {
         json: { email, password },
       });
+
+      console.log("✅ Login response:", response.status);
+      console.log("🔐 After login - cookies:", document.cookie);
 
       // Invalidate the "me" query to refetch user data
       await queryClient.invalidateQueries({ queryKey: ["me"] });
