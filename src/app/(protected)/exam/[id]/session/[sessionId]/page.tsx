@@ -6,12 +6,14 @@ import {
   useSessionDetailQuery,
   useSubmitExamMutation,
 } from "@/queries/exam";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useTimer } from "@/hooks/useTimer";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { SkeletonLayout } from "@/components/ui/skeleton-layout";
 import { QuestionNavigationSidebar } from "@/components/ui/question-navigation-sidebar";
+import type { SessionDetailType } from "@/schemaValidations/exam.schema";
 
 export default function ExamSessionPage() {
   const params = useParams<{ id: string; sessionId: string }>();
@@ -19,6 +21,7 @@ export default function ExamSessionPage() {
   const examId = params?.id ?? "";
   const sessionId = params?.sessionId ?? "";
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useSessionDetailQuery({
     examId,
@@ -229,6 +232,27 @@ export default function ExamSessionPage() {
     },
   });
 
+  const updateSelectedOption = useCallback(
+    (questionId: string, selectedOptionId: string) => {
+      queryClient.setQueryData<SessionDetailType>(
+        ["sessionDetail", examId, sessionId],
+        (previous) => {
+          if (!previous) return previous;
+
+          return {
+            ...previous,
+            questions: previous.questions.map((question) =>
+              question.questionId === questionId
+                ? { ...question, selectedOptionId }
+                : question,
+            ),
+          };
+        },
+      );
+    },
+    [queryClient, examId, sessionId],
+  );
+
   /**
    * 🎓 HANDLER OPTION CHANGE VỚI DEBOUNCE
    * Kiến thức: Debounce pattern để giảm API calls
@@ -245,6 +269,8 @@ export default function ExamSessionPage() {
    * Result: 3 clicks → 1 API call (75% reduction)
    */
   const handeSelectOption = (questionId: string, selectedOptionId: string) => {
+    updateSelectedOption(questionId, selectedOptionId);
+
     // Lưu answer tạm thời vào ref
     pendingAnswerRef.current = { questionId, selectedOptionId };
 
@@ -259,6 +285,7 @@ export default function ExamSessionPage() {
       if (pendingAnswerRef.current) {
         const { questionId, selectedOptionId } = pendingAnswerRef.current;
         saveAnswerMutation.mutate({
+          examId,
           sessionId,
           data: { questionId, selectedOptionId },
         });

@@ -41,15 +41,19 @@ export const useSaveAnswerMutation = (options?: {
 
   return useMutation({
     mutationFn: ({
+      examId,
       sessionId,
       data,
     }: {
+      examId: string;
       sessionId: string;
       data: { questionId: string; selectedOptionId: string };
     }) => examApiRequest.saveSessionAnswer(sessionId, data),
-    onSuccess: () => {
-      // Refetch session detail để update UI với answer mới
-      queryClient.invalidateQueries({ queryKey: ["sessionDetail"] });
+    onSuccess: (_result, variables) => {
+      // Refetch only current session to keep cache in sync
+      queryClient.invalidateQueries({
+        queryKey: ["sessionDetail", variables.examId, variables.sessionId],
+      });
       // ✅ Gọi callback từ component nếu có
       options?.onSuccess?.();
     },
