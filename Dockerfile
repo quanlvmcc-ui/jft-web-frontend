@@ -1,24 +1,26 @@
-FROM node:20-alpine AS builder
+# ==============================
+# Stage 1 — Build
+# ==============================
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
+
 RUN npm run build
 
-FROM node:20-alpine
+
+# ==============================
+# Stage 2 — Runtime
+# ==============================
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --omit=dev
-
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app ./
 
 EXPOSE 3000
 
