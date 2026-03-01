@@ -1,6 +1,13 @@
 // src/lib/http.ts
 import ky from "ky";
 
+// Assign environment variable to constant at module level for proper static inlining
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL environment variable is not defined");
+}
+
 // Biến cờ để kiểm soát việc refresh token chỉ thực hiện một lần tại một thời điểm
 let isRefreshing = false;
 // Biến lưu promise của request refresh token, giúp các request khác chờ kết quả refresh
@@ -8,7 +15,7 @@ let refreshPromise: Promise<Response> | null = null;
 
 export const http = ky.create({
   // Tiền tố URL cho tất cả request, lấy từ biến môi trường
-  prefixUrl: process.env.NEXT_PUBLIC_API_URL,
+  prefixUrl: API_URL,
   // Gửi cookie HttpOnly cùng request (dùng cho xác thực)
   credentials: "include",
   headers: {
