@@ -1,12 +1,8 @@
-// src/lib/http.ts
+"use client";
+
 import ky from "ky";
 
-// Assign environment variable to constant at module level for proper static inlining
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL environment variable is not defined");
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 // Biến cờ để kiểm soát việc refresh token chỉ thực hiện một lần tại một thời điểm
 let isRefreshing = false;

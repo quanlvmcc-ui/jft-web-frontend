@@ -1,25 +1,17 @@
 # ==============================
-# Global ARG (quan trọng)
-# ==============================
-ARG NEXT_PUBLIC_API_URL
-
-# ==============================
 # Stage 1 — Build
 # ==============================
 FROM node:20-bookworm-slim AS builder
 
-# Nhận lại ARG trong stage
+WORKDIR /app
+
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
-WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
-
-RUN echo ">>> BUILD ARG: $NEXT_PUBLIC_API_URL"
 
 RUN npm run build
 
@@ -40,5 +32,4 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.* ./
 
 EXPOSE 3000
-
 CMD ["npm", "start"]
