@@ -1,0 +1,52 @@
+name: 🎨 Deploy Frontend to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout (optional but good practice)
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy to VPS
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key $USER@$HOST << 'EOF'
+            set -e
+
+            echo "📁 Go to frontend directory..."
+            cd /var/www/jft/frontend
+
+            echo "🔄 Pull latest frontend code..."
+            git pull origin main
+
+            echo "📦 Go to docker-compose directory..."
+            cd ../../jft-deploy
+
+            echo "🔨 Rebuilding frontend container..."
+            docker compose up -d --build frontend
+
+            echo "🧹 Cleaning unused images..."
+            docker image prune -f
+
+            echo "✅ Frontend deployed successfully!"
+            docker compose ps frontend
+          EOF
+
+      - name: ✅ Done
+        run: echo "Frontend deployment finished 🚀"
