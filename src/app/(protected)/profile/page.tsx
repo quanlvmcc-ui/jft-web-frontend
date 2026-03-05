@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useChangePasswordMutation,
   useExamHistoryQuery,
   useUpdateProfileMutation,
   useUserProfileQuery,
@@ -26,16 +27,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { UpdateProfileBodyType } from "@/schemaValidations/profile.schema";
+import {
+  ChangePasswordBodyType,
+  UpdateProfileBodyType,
+} from "@/schemaValidations/profile.schema";
+import { ChangePasswordDialog } from "@/components/profile/ChangePasswordDialog";
 
 export default function ProfilePage() {
   const userProfile = useUserProfileQuery();
   const examHistory = useExamHistoryQuery();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
 
   const updateProfileMutation = useUpdateProfileMutation();
+  const changePasswordMutation = useChangePasswordMutation();
   const { toast } = useToast();
 
   const handleUpdateProfile = async (data: UpdateProfileBodyType) => {
@@ -51,6 +58,23 @@ export default function ProfilePage() {
         title: "Lỗi cập nhật",
         description:
           error instanceof Error ? error.message : "Không thể cập nhật.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleChangePassword = async (data: ChangePasswordBodyType) => {
+    try {
+      await changePasswordMutation.mutateAsync(data);
+      toast({
+        title: "Cập nhật thành công",
+        description: "Mật khẩu đã được cập nhật.",
+      });
+      setIsChangePasswordOpen(false);
+    } catch (error) {
+      toast({
+        title: "Lỗi cập nhật",
+        description: "Không thể cập nhật mật khẩu.",
         variant: "destructive",
       });
     }
@@ -205,6 +229,9 @@ export default function ProfilePage() {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button onClick={() => setIsEditOpen(true)}>Chỉnh sửa thông tin</Button>
+        <Button onClick={() => setIsChangePasswordOpen(true)} variant="outline">
+          Cập nhật mật khẩu
+        </Button>
       </div>
 
       {/* Exam History Card */}
@@ -324,6 +351,13 @@ export default function ProfilePage() {
         }}
         onSubmit={handleUpdateProfile}
         isPending={updateProfileMutation.isPending}
+      />
+
+      <ChangePasswordDialog
+        open={isChangePasswordOpen}
+        onOpenChange={setIsChangePasswordOpen}
+        onSubmit={handleChangePassword}
+        isPending={changePasswordMutation.isPending}
       />
     </div>
   );
