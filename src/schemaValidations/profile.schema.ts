@@ -49,7 +49,6 @@ export const ExamHistoryItemResponse = z
     timeTaken: z.number(), // giây
   })
   .strict();
-  .strict();
 
 export type ExamHistoryItemResponseType = z.TypeOf<
   typeof ExamHistoryItemResponse
