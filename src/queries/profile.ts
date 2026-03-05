@@ -40,3 +40,11 @@ export const useExamHistoryQuery = () => {
     queryFn: () => profileApiRequest.getExamHistory(),
   });
 };
+
+// Upload avatar hook - KHÔNG invalidate ở đây vì chưa update profile
+export const useUploadAvatarMutation = () => {
+  return useMutation({
+    mutationFn: (file: File) => profileApiRequest.uploadAvatar(file),
+    // onSuccess bị remove - sẽ invalidate sau khi updateProfile
+  });
+};

@@ -32,6 +32,7 @@ import {
   UpdateProfileBodyType,
 } from "@/schemaValidations/profile.schema";
 import { ChangePasswordDialog } from "@/components/profile/ChangePasswordDialog";
+import { getAbsoluteAvatarUrl } from "@/lib/avatar-utils";
 
 export default function ProfilePage() {
   const userProfile = useUserProfileQuery();
@@ -167,7 +168,7 @@ export default function ProfilePage() {
             {/* Avatar */}
             <Avatar className="h-24 w-24 flex-shrink-0">
               <AvatarImage
-                src={profile.avatarUrl || undefined}
+                src={getAbsoluteAvatarUrl(profile.avatarUrl)}
                 alt={profile.displayName || profile.email}
               />
               <AvatarFallback>
