@@ -1,6 +1,10 @@
 "use client";
 
-import { useExamHistoryQuery, useUserProfileQuery } from "@/queries/profile";
+import {
+  useExamHistoryQuery,
+  useUpdateProfileMutation,
+  useUserProfileQuery,
+} from "@/queries/profile";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,23 +23,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
+import { useToast } from "@/components/ui/use-toast";
+import { UpdateProfileBodyType } from "@/schemaValidations/profile.schema";
 
 export default function ProfilePage() {
   const userProfile = useUserProfileQuery();
   const examHistory = useExamHistoryQuery();
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isPasswordOpen, setIsPasswordOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
 
-  // Reset pagination when exam data changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [examHistory.data]);
+  const updateProfileMutation = useUpdateProfileMutation();
+  const { toast } = useToast();
 
-  console.log("examHistory", examHistory.data);
+  const handleUpdateProfile = async (data: UpdateProfileBodyType) => {
+    try {
+      await updateProfileMutation.mutateAsync(data);
+      toast({
+        title: "Cập nhật thành công",
+        description: "Thông tin cá nhân đã được cập nhật.",
+      });
+      setIsEditOpen(false);
+    } catch (error) {
+      toast({
+        title: "Lỗi cập nhật",
+        description:
+          error instanceof Error ? error.message : "Không thể cập nhật.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (userProfile.isLoading) {
     return (
@@ -186,9 +205,6 @@ export default function ProfilePage() {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button onClick={() => setIsEditOpen(true)}>Chỉnh sửa thông tin</Button>
-        <Button onClick={() => setIsPasswordOpen(true)} variant="outline">
-          Đổi mật khẩu
-        </Button>
       </div>
 
       {/* Exam History Card */}
@@ -295,6 +311,20 @@ export default function ProfilePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Profile Dialog */}
+      <EditProfileDialog
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        defaultValues={{
+          displayName: profile.displayName || "",
+          phoneNumber: profile.phoneNumber || "",
+          avatarUrl: profile.avatarUrl || "",
+          bio: profile.bio || "",
+        }}
+        onSubmit={handleUpdateProfile}
+        isPending={updateProfileMutation.isPending}
+      />
     </div>
   );
 }
