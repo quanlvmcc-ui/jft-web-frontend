@@ -5,6 +5,7 @@ export type Role = "USER" | "EDITOR" | "ADMIN";
 export type User = {
   id: string;
   email: string;
+  displayName?: string;
   role: Role;
 };
 
