@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
-import { Role } from "@/api/auth.api";
+import { UserRole, USER_ROLES, USER_ROLE_LABELS } from "@/types/enums";
 
 const navigation = [
   {
@@ -109,7 +109,7 @@ const navigation = [
         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
-    roles: ["ADMIN"], // Only visible to ADMIN
+    roles: [USER_ROLES.ADMIN], // Only visible to ADMIN
   },
 ];
 
@@ -148,7 +148,11 @@ export function DashboardSidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navigation.map((item) => {
           // Check role-based visibility
-          if (item.roles && !item.roles.includes(user?.role as Role)) {
+          if (
+            item.roles &&
+            user?.role &&
+            !(item.roles as string[]).includes(user.role)
+          ) {
             return null;
           }
 
@@ -181,7 +185,7 @@ export function DashboardSidebar() {
           <div className="flex-1 overflow-hidden">
             <p className="truncate text-sm font-medium">{displayName}</p>
             <p className="text-xs text-muted-foreground">
-              {user?.role === "ADMIN" ? "Quản trị viên" : "Biên tập viên"}
+              {user?.role ? USER_ROLE_LABELS[user.role] : "User"}
             </p>
           </div>
         </div>

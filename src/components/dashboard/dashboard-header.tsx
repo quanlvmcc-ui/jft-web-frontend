@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { USER_ROLE_LABELS } from "@/types/enums";
 import { useAuthStore } from "@/stores/auth.store";
 import {
   DropdownMenu,
@@ -90,7 +91,7 @@ export function DashboardHeader() {
             <div className="hidden md:block text-left">
               <p className="text-sm font-medium">{displayName}</p>
               <p className="text-xs text-muted-foreground">
-                {user?.role === "ADMIN" ? "Admin" : "Editor"}
+                {user?.role ? USER_ROLE_LABELS[user.role] : "User"}
               </p>
             </div>
             <svg

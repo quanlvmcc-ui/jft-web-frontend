@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { USER_ROLES } from "@/types/enums";
 
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -17,13 +18,15 @@ export default function DashboardLayout({
 
   // Role-based access control
   React.useEffect(() => {
-    if (user && !["EDITOR", "ADMIN"].includes(user.role)) {
+    const allowedRoles: string[] = [USER_ROLES.EDITOR, USER_ROLES.ADMIN];
+    if (user && !allowedRoles.includes(user.role)) {
       router.replace("/exam"); // Redirect students to exam page
     }
   }, [user, router]);
 
   // Only EDITOR/ADMIN can access dashboard
-  if (!user || !["EDITOR", "ADMIN"].includes(user.role)) {
+  const allowedRoles: string[] = [USER_ROLES.EDITOR, USER_ROLES.ADMIN];
+  if (!user || !allowedRoles.includes(user.role)) {
     return null;
   }
 

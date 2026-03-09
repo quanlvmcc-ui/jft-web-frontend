@@ -1,6 +1,10 @@
 import { z } from "zod";
+import { EXAM_STATUSES } from "@/types/enums";
 
-export const ExamStatusSchema = z.enum(["DRAFT", "PUBLISHED"]);
+export const ExamStatusSchema = z.enum([
+  EXAM_STATUSES.DRAFT,
+  EXAM_STATUSES.PUBLISHED,
+]);
 
 export const ExamSchema = z.object({
   id: z.string(),

@@ -1,7 +1,7 @@
 // src/hooks/useMe.ts
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { authApi, type User } from "@/api/auth.api";
+import authApiRequest, { type User } from "@/apiRequest/auth";
 import { useAuthStore } from "@/stores/auth.store";
 
 export function useMe() {
@@ -19,7 +19,7 @@ export function useMe() {
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
-        const result = await authApi.me();
+        const result = await authApiRequest.me();
         console.log("✅ /users/me success:", result);
         return result;
       } catch (err) {

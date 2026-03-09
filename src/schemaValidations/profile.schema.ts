@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { USER_ROLES } from "@/types/enums";
 
 export const UpdateProfileBody = z
   .object({
@@ -24,7 +25,7 @@ export const UserProfileResponse = z
   .object({
     id: z.string(),
     email: z.string(),
-    role: z.enum(["USER", "EDITOR", "ADMIN"]),
+    role: z.enum([USER_ROLES.USER, USER_ROLES.EDITOR, USER_ROLES.ADMIN]),
     displayName: z.string().nullable(),
     phoneNumber: z.string().nullable(),
     bio: z.string().nullable(),

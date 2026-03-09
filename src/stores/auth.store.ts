@@ -1,4 +1,4 @@
-import { User } from "@/api/auth.api";
+import { User } from "@/apiRequest/auth";
 import { create } from "zustand";
 
 type AuthState = {

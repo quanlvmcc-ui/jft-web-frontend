@@ -1,4 +1,4 @@
-import { authApi } from "@/api/auth.api";
+import authApiRequest from "@/apiRequest/auth";
 import { useAuthStore } from "@/stores/auth.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -7,7 +7,7 @@ export function useLogout() {
   const logoutStore = useAuthStore((s) => s.logout);
 
   return useMutation({
-    mutationFn: authApi.logout,
+    mutationFn: authApiRequest.logout,
     onSuccess: () => {
       // Clear user in zustand store
       logoutStore();

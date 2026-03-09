@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { USER_ROLES } from "@/types/enums";
 
 /* ======================================================
  * LOGIN
@@ -40,7 +41,7 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 export const UserSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
-  role: z.enum(["USER", "EDITOR", "ADMIN"]),
+  role: z.enum([USER_ROLES.USER, USER_ROLES.EDITOR, USER_ROLES.ADMIN]),
 });
 export type User = z.infer<typeof UserSchema>;
 
